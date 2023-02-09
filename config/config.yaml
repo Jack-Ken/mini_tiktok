@@ -1,0 +1,31 @@
+app:
+  name: "mini_tiktok"
+  mode: "dev"
+  port: 8080
+  version: "v.0.1"
+  start_time: "2022-01-02"
+  machine_id: 1
+
+log:
+  level: "debug"
+  filename: "../log/mini_tiktok.log"
+  max_size: 200
+  max_age: 30
+  max_backups: 5
+
+mysql:
+  host: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "123456"
+  dbname: "mini_tiktok"
+  charset: "utf8mb4"
+  max_open_connections: 200
+  max_idle_connections: 50
+
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  password: "123456"
+  db: 0
+  pool_size: 100
