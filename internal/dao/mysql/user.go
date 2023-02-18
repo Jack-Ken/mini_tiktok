@@ -15,8 +15,8 @@ import (
 // 检查用户名是否已经存在
 
 func CheckUserExist(username string) (err error) {
-	var user models.User
-	if !errors.Is(db.SqlSession.Where("username=?", username).First(&user).Error, gorm.ErrRecordNotFound) {
+	var userLogin models.Login
+	if !errors.Is(db.SqlSession.Where("username=?", username).First(&userLogin).Error, gorm.ErrRecordNotFound) {
 		return errors.New("用户已存在")
 	}
 	//if !errors.Is(global.App.DY_DB.Model(&model.User{}).Where("username = ?", user.Username).First(&u).Error, gorm.ErrRecordNotFound) {
@@ -28,6 +28,9 @@ func CheckUserExist(username string) (err error) {
 // 向数据库中插入注册的新用户数据
 
 func InserUser(user *models.User) (err error) {
+	if user == nil {
+		return errors.New("空指针错误")
+	}
 	if err = db.SqlSession.Create(user).Error; err != nil {
 		return err
 	}
@@ -35,26 +38,27 @@ func InserUser(user *models.User) (err error) {
 }
 
 //login
-//
-func Login(r *models.LoginRequest) (u *models.User, err error) {
-	var user models.User
-	if errors.Is(db.SqlSession.Where("username = ?", r.Username).First(&user).Error, gorm.ErrRecordNotFound) {
+
+func Login(r *models.LoginRequest) (*models.Login, error) {
+	var userLogin models.Login
+	if errors.Is(db.SqlSession.Where("username = ?", r.Username).First(&userLogin).Error, gorm.ErrRecordNotFound) {
 		// 用户名错误
 		return nil, errors.New("用户不存在")
 	}
-	if user.Password != utils.EncryptPassword(r.Password) {
+	if userLogin.Password != utils.EncryptPassword(r.Password) {
 		return nil, errors.New("密码错误")
 	}
-	return &user, nil
+	return &userLogin, nil
 }
 
 //userinfo
 
-func UserInfo(id int64, name string) (u *models.User, err error) {
-	var user models.User
-	if errors.Is(db.SqlSession.Where("username = ? AND id = ?", name, id).First(&user).Error, gorm.ErrRecordNotFound) {
-		// 用户名错误
+func UserInfo(id int64) (*models.User, error) {
+	var info models.User
+
+	db.SqlSession.Where("id = ?", id).Select([]string{"id", "name", "follow_count", "follower_count", "is_follow"}).First(&info)
+	if info.Id == 0 {
 		return nil, errors.New("用户不存在")
 	}
-	return &user, nil
+	return &info, nil
 }

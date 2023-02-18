@@ -3,12 +3,8 @@ package utils
 import (
 	"errors"
 	"mini_tiktok/internal/dao/models"
-	"mini_tiktok/internal/pkg"
 	"net/http"
 	"time"
-
-	"github.com/go-playground/validator/v10"
-	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 
@@ -69,27 +65,18 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		// 这里假设Token放在Header的Authorization中，并使用Bearer开头
 		// 这里的具体实现方式要依据你的实际业务情况决定
 		// 获取参数和参数校验
-		var r models.UserInfoRequest
-		if err := c.ShouldBindJSON(&r); err != nil {
-			// 请求参数有误，直接返回失败响应
-			zap.L().Error("userinfo request ShouldBindJson error", zap.Error(err))
-			// 判断err是不是validator.ValidationErrors类型
-			errs, ok := err.(validator.ValidationErrors)
-			if !ok {
-				c.JSON(http.StatusBadRequest, models.RegisterResponse{
-					Response: models.Response{
-						StatusCode: -1,
-						StatusMsg:  err.Error(),
-					},
-				})
-				c.Abort()
-				return
-			}
-			c.JSON(http.StatusBadRequest, gin.H{"error": pkg.RemoveTopStruct(errs.Translate(pkg.Trans))})
-			c.Abort()
+		tokenStr := c.Query("token")
+		if tokenStr == "" {
+			tokenStr = c.PostForm("token")
+		}
+		//用户不存在
+		if tokenStr == "" {
+			c.JSON(http.StatusOK, models.Response{StatusCode: 401, StatusMsg: "用户不存在"})
+			c.Abort() //阻止执行
 			return
 		}
-		mc, err := ParseToken(r.Token)
+
+		mc, err := ParseToken(tokenStr)
 		if err != nil {
 			c.JSON(http.StatusOK, models.RegisterResponse{
 				Response: models.Response{
@@ -100,6 +87,7 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
+
 		// 将当前请求的username信息保存到请求的上下文c上
 		c.Set("username", mc.UserName)
 		c.Set("userid", mc.UserID)

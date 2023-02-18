@@ -16,7 +16,7 @@ func InitRouter(mode string) *gin.Engine {
 	r.Use(initialize.GinLogger(), initialize.GinRecovery(true))
 	base := r.Group("/douyin")
 
-	base.GET("/feed") // 视频流接口
+	base.GET("/feed", controller.Feed_Hanlder) // 视频流接口
 
 	userGroup := base.Group("/user")
 	{

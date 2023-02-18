@@ -9,28 +9,34 @@ import (
 
 // service层存放业务逻辑代码
 
-func Register_service(r *models.RegisterRequest) (u *models.User, err error) {
+func Register_service(r *models.RegisterRequest) (user *models.User, err error) {
 	// 1、判断用户存不存在
 	if err = mysql.CheckUserExist(r.Username); err != nil {
 		return nil, err
 	}
+
+	userLogin := models.Login{Username: r.Username, Password: utils.EncryptPassword(r.Password)}
+
+	userInfo := models.User{User: &userLogin, Name: r.Username}
+
 	// 2、生成UID
 	newID := snowflake.G.GetID()
 	// 构造一个User实例
-	user := &models.User{
-		Username: r.Username,
-		Password: utils.EncryptPassword(r.Password), // 密码加密
-		ID:       newID,
-	}
+	userInfo.Id = newID
+	//user := &models.User{
+	//	Username: r.Username,
+	//	Password: utils.EncryptPassword(r.Password), // 密码加密
+	//	ID:       newID,
+	//}
 	//3、保存进数据库
-	if err := mysql.InserUser(user); err != nil {
+	if err = mysql.InserUser(&userInfo); err != nil {
 		return nil, err
 	}
-	return user, nil
+	return &userInfo, nil
 }
 
-func Login_Service(r *models.LoginRequest) (u *models.User, err error) {
-	var user *models.User
+func Login_Service(r *models.LoginRequest) (u *models.Login, err error) {
+	var user *models.Login
 	user, err = mysql.Login(r)
 	if err != nil {
 		return nil, err
@@ -38,11 +44,11 @@ func Login_Service(r *models.LoginRequest) (u *models.User, err error) {
 	return user, nil
 }
 
-func Info_Service(id int64, name string) (u *models.User, err error) {
-	var user *models.User
-	user, err = mysql.UserInfo(id, name)
+func Info_Service(id int64) (i *models.User, err error) {
+	//var info *models.UserInfoResponse
+	i, err = mysql.UserInfo(id)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	return i, nil
 }

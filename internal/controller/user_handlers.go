@@ -41,7 +41,7 @@ func Login_Hanlder(c *gin.Context) {
 	}
 
 	// 2、业务处理（services定义，此处只做调用处理）
-	resp, err := service.Login_Service(&r)
+	loginResp, err := service.Login_Service(&r)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
 			Response: models.Response{
@@ -52,7 +52,7 @@ func Login_Hanlder(c *gin.Context) {
 		return
 	}
 	// 3、获取token值
-	token, err := utils.GenToken(resp.Username, resp.ID)
+	token, err := utils.GenToken(loginResp.Username, loginResp.UserId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
 			Response: models.Response{
@@ -68,7 +68,7 @@ func Login_Hanlder(c *gin.Context) {
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		UserId: resp.ID,
+		UserId: loginResp.UserId,
 		Token:  token,
 	})
 
@@ -102,7 +102,7 @@ func Register_Hanlder(c *gin.Context) {
 
 	// 对请求参数进行参数校验
 	// 2、业务处理（services定义，此处只做调用处理）
-	resp, err := service.Register_service(&r)
+	userInfo, err := service.Register_service(&r)
 	if err != nil {
 		zap.L().Error("login failed", zap.String("username", r.Username), zap.String("password", r.Password), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
@@ -114,7 +114,7 @@ func Register_Hanlder(c *gin.Context) {
 		return
 	}
 	// 3、获取token
-	token, err := utils.GenToken(resp.Username, resp.ID)
+	token, err := utils.GenToken(userInfo.Name, userInfo.Id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
 			Response: models.Response{
@@ -130,19 +130,19 @@ func Register_Hanlder(c *gin.Context) {
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		UserId: resp.ID,
+		UserId: userInfo.Id,
 		Token:  token,
 	})
 }
 
 func QueryInfo_Hanlder(c *gin.Context) {
 	//todo
-	username := c.GetString("username")
+	//username := c.GetString("username")
 	userid := c.GetInt64("userid")
 
-	resp, err := service.Info_Service(userid, username)
+	userResp, err := service.Info_Service(userid)
 	if err != nil {
-		zap.L().Error("get user information failed", zap.String("username", resp.Username), zap.Error(err))
+		zap.L().Error("get user information failed", zap.String("username", userResp.Name), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
 			Response: models.Response{
 				StatusCode: -1,
@@ -152,20 +152,20 @@ func QueryInfo_Hanlder(c *gin.Context) {
 		return
 	}
 
-	user := models.UserInfo{
-		ID:            resp.ID,
-		UserName:      resp.Username,
-		FollowCount:   resp.FollowCount,
-		FollowerCount: resp.FollowerCount,
-		IsFollow:      resp.IsFollow,
-	}
+	//user := models.UserInfo{
+	//	ID:            resp.ID,
+	//	UserName:      resp.Username,
+	//	FollowCount:   resp.FollowCount,
+	//	FollowerCount: resp.FollowerCount,
+	//	IsFollow:      resp.IsFollow,
+	//}
 
 	c.JSON(http.StatusOK, models.UserInfoResponse{
 		Response: models.Response{
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		UserInfo: user,
+		User: *userResp,
 	})
 
 }

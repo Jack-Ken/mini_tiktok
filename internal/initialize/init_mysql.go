@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"fmt"
+	"mini_tiktok/internal/dao/models"
 
 	"gorm.io/gorm/schema"
 
@@ -26,6 +27,8 @@ func Init_Mysql(cfg *MySqlConfig) (err error) {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		//PrepareStmt:            true, //缓存预编译命令
+		SkipDefaultTransaction:                   true, //禁用默认事务操作
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
@@ -40,5 +43,10 @@ func Init_Mysql(cfg *MySqlConfig) (err error) {
 	// SetMaxOpenConns 设置打开数据库连接的最大数量。
 	sqlDb.SetMaxOpenConns(cfg.MaxOpenConnections)
 
+	err = SqlSession.AutoMigrate(&models.User{}, &models.Video{}, &models.Comment{}, &models.Login{}, &models.Message{})
+	if err != nil {
+		zap.L().Error("Create Mysql tables failed.Please check the config files....", zap.Error(err))
+		return
+	}
 	return
 }
