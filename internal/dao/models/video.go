@@ -43,10 +43,20 @@ type FeedRequest struct {
 	Token      string `json:"token" form:"token" binding:"required"`
 }
 
+type PublishListRequest struct {
+	UserId int64  `json:"user_id" form:"user_id" binding:"required"`
+	Token  string `json:"token" form:"token" binding:"required"`
+}
+
 // response 参数结构体
 
 type FeedResponse struct {
 	Response
 	VideoList []*Video `json:"video_list,omitempty"`
 	NextTime  int64    `json:"next_time,omitempty"`
+}
+
+type PublishListResponse struct {
+	Response
+	VideoList []*Video `json:"video_list,omitempty"`
 }

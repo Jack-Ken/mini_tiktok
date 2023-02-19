@@ -45,7 +45,7 @@ func (q *QueryFeed) Do() (*FeedVideoList, error) {
 
 func (q *QueryFeed) checkParams() {
 	if q.userid > 0 {
-
+		return
 		//uid有效，可以做一次定制的推荐视频流
 	}
 	if q.latestTime.IsZero() {

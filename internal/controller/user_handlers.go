@@ -2,8 +2,8 @@ package controller
 
 import (
 	"mini_tiktok/internal/dao/models"
-	"mini_tiktok/internal/pkg"
 	service "mini_tiktok/internal/services"
+	"mini_tiktok/pkg"
 	"mini_tiktok/utils"
 	"net/http"
 

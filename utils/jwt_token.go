@@ -2,9 +2,12 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"mini_tiktok/internal/dao/models"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 
@@ -69,19 +72,38 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		if tokenStr == "" {
 			tokenStr = c.PostForm("token")
 		}
+
+		//tokenStr, existGet := c.GetQuery("token")
+		//if !existGet {
+		//	tokenStr = c.PostForm("token")
+		//}
+
 		//用户不存在
 		if tokenStr == "" {
+			zap.L().Error("login request ShouldBindJson error", zap.Error(errors.New("token为空")))
 			c.JSON(http.StatusOK, models.Response{StatusCode: 401, StatusMsg: "用户不存在"})
 			c.Abort() //阻止执行
 			return
 		}
+		fmt.Println("the token is: %s", tokenStr)
 
 		mc, err := ParseToken(tokenStr)
 		if err != nil {
 			c.JSON(http.StatusOK, models.RegisterResponse{
 				Response: models.Response{
 					StatusCode: -1,
-					StatusMsg:  "无效的Token/Token验证错误/Token过期",
+					StatusMsg:  "无效的Token",
+				},
+			})
+			c.Abort()
+			return
+		}
+
+		if time.Now().Unix() > mc.ExpiresAt.Unix() {
+			c.JSON(http.StatusOK, models.RegisterResponse{
+				Response: models.Response{
+					StatusCode: -1,
+					StatusMsg:  "Token过期",
 				},
 			})
 			c.Abort()

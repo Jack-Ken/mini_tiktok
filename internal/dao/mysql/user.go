@@ -62,3 +62,16 @@ func UserInfo(id int64) (*models.User, error) {
 	}
 	return &info, nil
 }
+
+// 根据用户名检查用户是否存在
+
+func CheckUserExitById(uid int64) error {
+	var user models.User
+	if err := db.SqlSession.Where("id=?", uid).First(&user).Error; err != nil {
+		return err
+	}
+	if user.Id == 0 {
+		return errors.New("用户不存在")
+	}
+	return nil
+}

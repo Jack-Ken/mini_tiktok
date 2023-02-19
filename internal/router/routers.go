@@ -27,8 +27,8 @@ func InitRouter(mode string) *gin.Engine {
 
 	publishGroup := base.Group("/publish")
 	{
-		publishGroup.POST("/action") // 视频投稿
-		publishGroup.GET("/list")    // 发布列表
+		publishGroup.POST("/action", utils.JWTAuthMiddleware(), controller.PublishVideosHandler) // 视频投稿
+		publishGroup.GET("/list", utils.JWTAuthMiddleware(), controller.PublishListHandler)      // 发布列表
 	}
 
 	favoriteGroup := base.Group("/favorite")

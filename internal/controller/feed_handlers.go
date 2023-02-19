@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"mini_tiktok/internal/dao/models"
-	"mini_tiktok/internal/services"
+	service "mini_tiktok/internal/services"
 	"mini_tiktok/utils"
 	"net/http"
 	"strconv"
@@ -14,18 +14,17 @@ import (
 )
 
 func Feed_Hanlder(c *gin.Context) {
-	//todo
 	p := NewProxyFeedVideoList(c)
 	token, ok := c.GetQuery("token")
 	// 无登录状态
-	if !ok {
-		fmt.Println("11111")
+	if !ok || token == "" {
 		if err := p.DoNoToken(); err != nil {
 			p.FeedVideoListError(err.Error())
 		}
 		return
 	}
 	// 有登录状态
+	fmt.Println("feed token is:", token)
 	if err := p.DoWithToken(token); err != nil {
 		p.FeedVideoListError(err.Error())
 	}
@@ -43,13 +42,21 @@ func NewProxyFeedVideoList(c *gin.Context) *ProxyFeedVideoList {
 func (p *ProxyFeedVideoList) DoNoToken() error {
 	rawTimeStamp := p.Query("latest_time")
 	var latestTime time.Time
-	intTime, err := strconv.ParseInt(rawTimeStamp, 10, 64)
-	if err != nil {
-		latestTime = time.Unix(0, intTime*1e6) //注意：前端传来的时间戳是以ms为单位的
+	if rawTimeStamp == "" {
+		latestTime = time.Unix(time.Now().Unix(), 0)
+	} else {
+		intTime, err := strconv.ParseInt(rawTimeStamp, 10, 64)
+		if err != nil {
+			latestTime = time.Unix(0, intTime*1e6) //注意：前端传来的时间戳是以ms为单位的
+		}
 	}
+	//intTime, err := strconv.ParseInt(rawTimeStamp, 10, 64)
+	//if err != nil {
+	//	latestTime = time.Unix(0, intTime*1e6) //注意：前端传来的时间戳是以ms为单位的
+	//}
 
 	// 调用service层接口，获取videoList
-	videoList, err := services.QueryFeedVideoList(0, latestTime)
+	videoList, err := service.QueryFeedVideoList(0, latestTime)
 	if err != nil {
 		return err
 	}
@@ -68,12 +75,17 @@ func (p *ProxyFeedVideoList) DoWithToken(token string) error {
 	}
 	rawTimeStamp := p.Query("latest_time")
 	var latestTime time.Time
-	intTime, err := strconv.ParseInt(rawTimeStamp, 10, 64)
-	if err != nil {
-		latestTime = time.Unix(0, intTime*1e6) //注意：前端传来的时间戳是以ms为单位的
+	if rawTimeStamp == "" {
+		latestTime = time.Unix(time.Now().Unix(), 0)
+	} else {
+		intTime, err := strconv.ParseInt(rawTimeStamp, 10, 64)
+		if err != nil {
+			latestTime = time.Unix(0, intTime*1e6) //注意：前端传来的时间戳是以ms为单位的
+		}
 	}
+	//fmt.Println("latestTime is:", latestTime)
 	// 调用service层接口，获取videoList
-	videoList, err := services.QueryFeedVideoList(0, latestTime)
+	videoList, err := service.QueryFeedVideoList(mc.UserID, latestTime)
 	if err != nil {
 		return err
 	}
@@ -93,7 +105,7 @@ func (p *ProxyFeedVideoList) FeedVideoListError(msg string) {
 
 }
 
-func (p *ProxyFeedVideoList) FeedVideoListSuccess(videoList *services.FeedVideoList) {
+func (p *ProxyFeedVideoList) FeedVideoListSuccess(videoList *service.FeedVideoList) {
 	p.JSON(http.StatusOK, models.FeedResponse{
 		Response: models.Response{
 			StatusCode: 0,
