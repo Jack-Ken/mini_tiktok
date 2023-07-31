@@ -16,6 +16,7 @@ type Config struct {
 	*LogConfig   `mapstructure:"log"`
 	*MySqlConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
+	*QiNiuConfig `mapstructure:"qiniu"`
 }
 
 type AppConfig struct {
@@ -52,6 +53,13 @@ type RedisConfig struct {
 	Password string `mapstructure:"password"`
 	Db       int    `mapstructure:"db"`
 	PoolSize int    `mapstructure:"pool_size"`
+}
+
+type QiNiuConfig struct {
+	Accesskey   string `mapstructure:"accesskey"`
+	Sercetkey   string `mapstructure:"sercetkey"`
+	Bucket      string `mapstructure:"bucket"`
+	Qiniuserver string `mapstructure:"qiniuserver"`
 }
 
 // 加载配置文件

@@ -35,11 +35,11 @@ func main() {
 		return
 	}
 	// 4、初始化Redis连接
-	//if err := initialize.Init_Redis(initialize.Conf.RedisConfig); err != nil {
-	//	fmt.Printf("initialize redis link failed, err:%v \n", err)
-	//	return
-	//}
-	//defer initialize.Close_Redis()
+	if err := initialize.Init_Redis(initialize.Conf.RedisConfig); err != nil {
+		fmt.Printf("initialize redis link failed, err:%v \n", err)
+		return
+	}
+	defer initialize.Close_Redis()
 	//雪花算法生成ID的初始化,genID用于创建新的ID，且已经做了互斥处理
 
 	//fmt.Println(genID.GetID())
@@ -86,6 +86,5 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		zap.L().Fatal("Server Shutdown: ", zap.Error(err))
 	}
-
 	zap.L().Info("Server exiting")
 }

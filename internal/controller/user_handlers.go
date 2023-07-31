@@ -1,11 +1,15 @@
 package controller
 
 import (
+	"context"
+	"log"
 	"mini_tiktok/internal/dao/models"
-	service "mini_tiktok/internal/services"
+	authService "mini_tiktok/internal/rpc/rpcGen/auth"
 	"mini_tiktok/pkg"
-	"mini_tiktok/utils"
 	"net/http"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-playground/validator/v10"
 
@@ -15,6 +19,22 @@ import (
 )
 
 // login handler
+
+var AuthClient authService.AuthServiceClient
+
+const auth_address = "127.0.0.1:8889"
+
+func init() {
+	// 连接服务器
+	conn, err := grpc.Dial(auth_address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("net.Connect err: %v", err)
+	}
+	defer conn.Close()
+
+	// 建立gRPC连接
+	AuthClient = authService.NewAuthServiceClient(conn)
+}
 
 func Login_Hanlder(c *gin.Context) {
 	//todo
@@ -40,38 +60,16 @@ func Login_Hanlder(c *gin.Context) {
 		return
 	}
 
-	// 2、业务处理（services定义，此处只做调用处理）
-	loginResp, err := service.Login_Service(&r)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
-			Response: models.Response{
-				StatusCode: -1,
-				StatusMsg:  err.Error(),
-			},
-		})
-		return
-	}
-	// 3、获取token值
-	token, err := utils.GenToken(loginResp.Username, loginResp.UserId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
-			Response: models.Response{
-				StatusCode: -1,
-				StatusMsg:  err.Error(),
-			},
-		})
-		return
-	}
-	// 4、返回响应
-	c.JSON(http.StatusOK, models.RegisterResponse{
-		Response: models.Response{
-			StatusCode: 0,
-			StatusMsg:  "success",
-		},
-		UserId: loginResp.UserId,
-		Token:  token,
+	// 内部调用grpc服务
+	resp, err := AuthClient.Login(context.Background(), &authService.LoginRequest{
+		Username: r.Username,
+		Password: r.Password,
 	})
+	if err != nil {
+		zap.L().Error("user login failed", zap.Error(err))
+	}
 
+	c.JSON(http.StatusOK, resp)
 }
 
 // register handler
@@ -99,40 +97,16 @@ func Register_Hanlder(c *gin.Context) {
 		//
 		return
 	}
-
-	// 对请求参数进行参数校验
-	// 2、业务处理（services定义，此处只做调用处理）
-	userInfo, err := service.Register_service(&r)
-	if err != nil {
-		zap.L().Error("login failed", zap.String("username", r.Username), zap.String("password", r.Password), zap.Error(err))
-		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
-			Response: models.Response{
-				StatusCode: -1,
-				StatusMsg:  err.Error(),
-			},
-		})
-		return
-	}
-	// 3、获取token
-	token, err := utils.GenToken(userInfo.Name, userInfo.Id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
-			Response: models.Response{
-				StatusCode: -1,
-				StatusMsg:  err.Error(),
-			},
-		})
-		return
-	}
-	// 4、返回响应
-	c.JSON(http.StatusOK, models.RegisterResponse{
-		Response: models.Response{
-			StatusCode: 0,
-			StatusMsg:  "success",
-		},
-		UserId: userInfo.Id,
-		Token:  token,
+	// 内部调用grpc服务
+	resp, err := AuthClient.Register(context.Background(), &authService.RegisterRequest{
+		Username: r.Username,
+		Password: r.Password,
 	})
+
+	if err != nil {
+		zap.L().Error("user register failed", zap.Error(err))
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 func QueryInfo_Hanlder(c *gin.Context) {
@@ -140,32 +114,14 @@ func QueryInfo_Hanlder(c *gin.Context) {
 	//username := c.GetString("username")
 	userid := c.GetInt64("userid")
 
-	userResp, err := service.Info_Service(userid)
+	resp, err := AuthClient.QueryInfo(context.Background(), &authService.QueryInfoRequest{
+		UserId: userid,
+	})
+
 	if err != nil {
-		zap.L().Error("get user information failed", zap.String("username", userResp.Name), zap.Error(err))
-		c.JSON(http.StatusInternalServerError, models.RegisterResponse{
-			Response: models.Response{
-				StatusCode: -1,
-				StatusMsg:  err.Error(),
-			},
-		})
-		return
+		zap.L().Error("get user information failed", zap.String("username", resp.User.Name), zap.Error(err))
 	}
 
-	//user := models.UserInfo{
-	//	ID:            resp.ID,
-	//	UserName:      resp.Username,
-	//	FollowCount:   resp.FollowCount,
-	//	FollowerCount: resp.FollowerCount,
-	//	IsFollow:      resp.IsFollow,
-	//}
-
-	c.JSON(http.StatusOK, models.UserInfoResponse{
-		Response: models.Response{
-			StatusCode: 0,
-			StatusMsg:  "success",
-		},
-		User: *userResp,
-	})
+	c.JSON(http.StatusOK, resp)
 
 }

@@ -33,8 +33,8 @@ func InitRouter(mode string) *gin.Engine {
 
 	favoriteGroup := base.Group("/favorite")
 	{
-		favoriteGroup.POST("/action") // 赞操作
-		favoriteGroup.GET("/list")    // 喜欢列表
+		favoriteGroup.POST("/action", utils.JWTAuthMiddleware()) // 赞操作
+		favoriteGroup.GET("/list")                               // 喜欢列表
 	}
 
 	commentGroup := base.Group("/comment")

@@ -15,8 +15,8 @@ func Init_Redis(cfg *RedisConfig) (err error) {
 			cfg.Host,
 			cfg.Port,
 		),
-		Password: fmt.Sprintf("%s", cfg.Password), // no password set
-		DB:       cfg.Db,                          // use default DB
+		//Password: fmt.Sprintf("%s", cfg.Password), // no password set
+		DB:       cfg.Db, // use default DB
 		PoolSize: cfg.PoolSize,
 	})
 

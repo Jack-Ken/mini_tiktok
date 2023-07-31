@@ -29,3 +29,11 @@ redis:
   password: "123456"
   db: 0
   pool_size: 100
+
+qiniu:
+  accesskey: "UGBFJdhQOWUe72cPA-NWjBpJpQ3jD9SzJIJMj5fn"
+  sercetkey: "otu3im7-VCo6QOnoyfkG5ryTewnNxDzUBCtLAIs_"
+  bucket: "minitiktok"
+  qiniuserver: "rym83vvtw.hb-bkt.clouddn.com"
+
+

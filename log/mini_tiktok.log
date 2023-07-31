@@ -810,3 +810,8 @@
 {"level":"DEBUG","time":"2023-02-19T21:22:51.693+0800","caller":"cmd/main.go:31","msg":"logger initialize success..."}
 {"level":"INFO","time":"2023-02-19T21:23:11.327+0800","caller":"initialize/init_log.go:82","msg":"/douyin/feed","status":200,"method":"GET","path":"/douyin/feed","query":"token=&latest_time=","ip":"127.0.0.1","user-agent":"apifox/1.0.0 (https://www.apifox.cn)","errors":"","cost":0.0038678}
 {"level":"INFO","time":"2023-02-19T21:23:44.435+0800","caller":"initialize/init_log.go:82","msg":"/douyin/feed","status":200,"method":"GET","path":"/douyin/feed","query":"token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Iui-m-aZqCIsInVzZXJfaWQiOjE0OTg2MTM3NzAwNjExMjc2OCwiaXNzIjoicG90YXRvZXMiLCJleHAiOjE2NzY4OTgzMzF9.vUdmz_8efeaAloxJaPMbgTijMLEgjeZfOSkbyFWCpkQ&latest_time=","ip":"127.0.0.1","user-agent":"apifox/1.0.0 (https://www.apifox.cn)","errors":"","cost":0.0285076}
+{"level":"INFO","time":"2023-02-19T22:41:24.521+0800","caller":"cmd/main.go:81","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2023-02-19T22:41:24.833+0800","caller":"cmd/main.go:90","msg":"Server exiting"}
+{"level":"DEBUG","time":"2023-07-29T16:25:03.985+0800","caller":"cmd/main.go:31","msg":"logger initialize success..."}
+{"level":"INFO","time":"2023-07-29T16:38:26.126+0800","caller":"cmd/main.go:81","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2023-07-29T16:38:26.138+0800","caller":"cmd/main.go:89","msg":"Server exiting"}
